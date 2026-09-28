@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Battle Results - Favoje</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2C7A7B; --pl: #38B2AC; --secondary: #E8917A; --accent: #81C784;
+            --danger: #E53E3E; --info: #6B46C1; --bg: #FFF; --bg2: #F7FAFC; --card: #FFF;
+            --text: #2D3748; --t2: #4A5568; --muted: #A0AEC0; --border: #E2E8F0;
+            --r: 14px; --rs: 8px; --rf: 50px;
+            --grad: linear-gradient(135deg, #2C7A7B, #38B2AC, #4FD1C5);
+            --tr: all .3s cubic-bezier(.4,0,.2,1);
+        }
+        [data-theme="dark"] {
+            --bg: #1A202C; --bg2: #2D3748; --card: #2D3748; --text: #F7FAFC;
+            --t2: #CBD5E0; --muted: #A0AEC0; --border: #4A5568;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+        
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        /* HERO RESULT */
+        .result-hero { background: var(--grad); border-radius: var(--r); padding: 32px 24px; text-align: center; color: #fff; position: relative; overflow: hidden; margin-bottom: 24px; }
+        .result-hero::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+        .result-icon { font-size: 48px; margin-bottom: 12px; }
+        .result-title { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+        .result-subtitle { font-size: 14px; opacity: 0.9; }
+
+        /* STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; text-align: center; }
+        .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary); }
+        .stat-lbl { font-size: 11px; color: var(--t2); margin-top: 4px; }
+
+        /* STANDINGS */
+        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .standings-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 24px; }
+        .standing-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); transition: var(--tr); }
+        .standing-item:last-child { border-bottom: none; }
+        .standing-item.me { background: rgba(44,122,123,0.05); }
+        .standing-item.top-1 { background: linear-gradient(90deg, rgba(232,145,122,0.1), transparent); }
+        .rank-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+        .rank-badge.gold { background: #F6E05E; color: #744210; }
+        .rank-badge.silver { background: #E2E8F0; color: #2D3748; }
+        .rank-badge.bronze { background: #FBD38D; color: #744210; }
+        .player-info { flex: 1; }
+        .player-name { font-weight: 700; font-size: 14px; }
+        .player-uid { font-size: 11px; color: var(--muted); font-family: monospace; }
+        .player-score { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 18px; color: var(--primary); }
+        .rating-change { font-size: 12px; font-weight: 700; margin-left: 8px; }
+        .rating-change.positive { color: var(--accent); }
+        .rating-change.negative { color: var(--danger); }
+
+        /* ACTIONS */
+        .action-buttons { display: flex; gap: 12px; }
+        .btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: var(--rf); font-weight: 700; font-size: 14px; text-decoration: none; transition: var(--tr); cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+        .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 4px 15px rgba(44,122,123,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="result-hero">
+            <div class="result-icon" id="resultIcon">🏆</div>
+            <div class="result-title" id="resultTitle">VICTORY!</div>
+            <div class="result-subtitle" id="resultSubtitle">You ranked #1 in this battle</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="statScore">0</div>
+                <div class="stat-lbl">Final Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statAccuracy">0%</div>
+                <div class="stat-lbl">Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statRating">+25</div>
+                <div class="stat-lbl">Rating Change</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="statBP">+50</div>
+                <div class="stat-lbl">Battle Points</div>
+            </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-trophy" style="color:var(--secondary)"></i> Final Standings</div>
+        <div class="standings-list" id="standingsList">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="action-buttons">
+            <a href="battles.html" class="btn btn-ghost"><i class="fas fa-home"></i> Home</a>
+            <button class="btn btn-primary" id="rematchBtn" onclick="requestRematch()"><i class="fas fa-redo"></i> Rematch</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQ5LEiCCeBzQNrBNXF2--BE-Cp6p0Q9f0",
+            authDomain: "ofuje-a6c29.firebaseapp.com",
+            projectId: "ofuje-a6c29",
+            storageBucket: "ofuje-a6c29.firebasestorage.app",
+            messagingSenderId: "643585276217",
+            appId: "1:643585276217:web:843900d17d0566a756d0e8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        const matchId = new URLSearchParams(window.location.search).get('match');
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = 'login.html'; return; }
+            currentUser = user;
+            if (!matchId) { window.location.href = 'battles.html'; return; }
+            await loadResults();
+        });
+
+        async function loadResults() {
+            const matchSnap = await db.collection('battleMatches').doc(matchId).get();
+            if (!matchSnap.exists) { alert('Match not found'); window.location.href = 'battles.html'; return; }
+            
+            const matchData = matchSnap.data();
+            const roomSnap = await db.collection('competitiveRooms').doc(matchData.roomId).get();
+            const roomData = roomSnap.data();
+            const players = roomData.players;
+            const scores = matchData.scores || {};
+
+            // Sort players by score
+            const sortedPlayers = players.map(p => ({
+                ...p,
+                finalScore: scores[p.userId] || 0,
+                isMe: p.userId === currentUser.uid
+            })).sort((a, b) => b.finalScore - a.finalScore);
+
+            const myRank = sortedPlayers.findIndex(p => p.isMe) + 1;
+            const myData = sortedPlayers.find(p => p.isMe);
+
+            // Update Hero
+            document.getElementById('resultIcon').textContent = myRank === 1 ? '🏆' : (myRank <= 3 ? '🥈' : '️');
+            document.getElementById('resultTitle').textContent = myRank === 1 ? 'VICTORY!' : (myRank <= 3 ? 'PODIUM FINISH!' : 'BATTLE COMPLETE');
+            document.getElementById('resultSubtitle').textContent = `You ranked #${myRank} out of ${sortedPlayers.length} players`;
+
+            // Update Stats (Simulated accuracy for demo)
+            document.getElementById('statScore').textContent = myData.finalScore;
+            document.getElementById('statAccuracy').textContent = Math.floor(Math.random() * 40 + 60) + '%'; 
+            document.getElementById('statRating').textContent = myRank === 1 ? '+25' : (myRank <= 3 ? '+10' : '-5');
+            document.getElementById('statRating').className = 'stat-val ' + (myRank <= 3 ? 'positive' : 'negative');
+            document.getElementById('statBP').textContent = myRank === 1 ? '+50' : '+10';
+
+            // Render Standings
+            const list = document.getElementById('standingsList');
+            list.innerHTML = sortedPlayers.map((p, i) => {
+                const rankClass = i === 0 ? 'gold' : (i === 1 ? 'silver' : (i === 2 ? 'bronze' : ''));
+                const ratingChange = i === 0 ? '+25' : (i <= 2 ? '+10' : '-5');
+                const ratingClass = i <= 2 ? 'positive' : 'negative';
+                
+                return `
+                <div class="standing-item ${p.isMe ? 'me' : ''} ${i === 0 ? 'top-1' : ''}">
+                    <div class="rank-badge ${rankClass}">${i + 1}</div>
+                    <div class="player-info">
+                        <div class="player-name">${p.name} ${p.isMe ? '(You)' : ''}</div>
+                        <div class="player-uid">${p.competitiveUid}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;">
+                        <div class="player-score">${p.finalScore}</div>
+                        <div class="rating-change ${ratingClass}">${ratingChange}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function requestRematch() {
+            // In production, this creates a new room with the same settings and invites the same players
+            alert('Rematch request sent to all players! (Feature requires Cloud Function trigger)');
+        }
+    </script>
+</body>
+</html>
