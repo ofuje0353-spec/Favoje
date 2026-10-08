@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Life: Naija — Your Campus. Your Life. Your Story.</title>
+
+<style>
+  :root{
+    --bg-primary:#0a0e0d;
+    --bg-secondary:#121917;
+    --surface:#161f1c;
+    --surface-light:#1d2824;
+    --border:#263330;
+    --green:#1db954;
+    --green-dark:#14883c;
+    --gold:#d4af37;
+    --text-primary:#f2f5f3;
+    --text-secondary:#8a9a94;
+    --danger:#e5484d;
+    --success:#1db954;
+    --radius:14px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;}
+
+  html,body{height:100%;}
+
+  body{
+    background:var(--bg-primary);
+    color:var(--text-primary);
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ---------- Animated background ---------- */
+  #bgCanvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    opacity:0.5;
+  }
+
+  .bg-glow{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(29,185,84,0.12), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(212,175,55,0.08), transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(29,185,84,0.05), transparent 60%);
+    pointer-events:none;
+  }
+
+  /* ---------- Layout ---------- */
+  .wrapper{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+
+  .shell{
+    width:100%;
+    max-width:980px;
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+    min-height:600px;
+  }
+
+  @media(max-width:860px){
+    .shell{grid-template-columns:1fr;}
+    .brand-panel{display:none;}
+  }
+
+  /* ---------- Brand panel ---------- */
+  .brand-panel{
+    background:
+      linear-gradient(160deg, rgba(29,185,84,0.15), rgba(10,14,13,0.9)),
+      linear-gradient(0deg, var(--bg-secondary), var(--bg-secondary));
+    padding:48px 42px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-right:1px solid var(--border);
+    position:relative;
+  }
+
+  .brand-top .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+
+  .logo-badge{
+    width:40px;height:40px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:18px;
+    color:#06140b;
+  }
+
+  .logo-text{
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:0.5px;
+  }
+  .logo-text span{color:var(--green);}
+
+  .brand-tagline{
+    color:var(--text-secondary);
+    font-size:13px;
+    margin-top:4px;
+    letter-spacing:0.3px;
+  }
+
+  .brand-headline{
+    font-size:34px;
+    font-weight:800;
+    line-height:1.25;
+    margin-top:60px;
+  }
+  .brand-headline .accent{color:var(--green);}
+
+  .brand-sub{
+    color:var(--text-secondary);
+    margin-top:16px;
+    font-size:14.5px;
+    line-height:1.6;
+    max-width:380px;
+  }
+
+  .feature-list{
+    margin-top:34px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .feature-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:13.5px;
+    color:var(--text-secondary);
+  }
+
+  .feature-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--green);
+    flex-shrink:0;
+    box-shadow:0 0 8px var(--green);
+  }
+
+  .brand-footer{
+    color:#55625d;
+    font-size:11.5px;
+    margin-top:30px;
+  }
+
+  /* ---------- Form panel ---------- */
+  .form-panel{
+    padding:48px 42px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  .tabs{
+    display:flex;
+    background:var(--bg-secondary);
+    border-radius:12px;
+    padding:4px;
+    margin-bottom:30px;
+    border:1px solid var(--border);
+  }
+
+  .tab-btn{
+    flex:1;
+    padding:11px;
+    border:none;
+    background:transparent;
+    color:var(--text-secondary);
+    font-weight:600;
+    font-size:13.5px;
+    border-radius:9px;
+    cursor:pointer;
+    transition:0.25s;
+  }
+
+  .tab-btn.active{
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+    color:#06140b;
+  }
+
+  .form-view{display:none;animation:fadeIn 0.35s ease;}
+  .form-view.active{display:block;}
+
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  .form-title{
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:6px;
+  }
+  .form-subtitle{
+    color:var(--text-secondary);
+    font-size:13.5px;
+    margin-bottom:26px;
+  }
+
+  .field{
+    margin-bottom:18px;
+    position:relative;
+  }
+
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--text-secondary);
+    margin-bottom:7px;
+    letter-spacing:0.3px;
+  }
+
+  .field input{
+    width:100%;
+    padding:13px 14px;
+    background:var(--bg-secondary);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:14px;
+    outline:none;
+    transition:0.2s;
+  }
+
+  .field input:focus{
+    border-color:var(--green);
+    box-shadow:0 0 0 3px rgba(29,185,84,0.15);
+  }
+
+  .toggle-eye{
+    position:absolute;
+    right:14px;
+    top:38px;
+    cursor:pointer;
+    color:var(--text-secondary);
+    font-size:12.5px;
+    user-select:none;
+    font-weight:600;
+  }
+  .toggle-eye:hover{color:var(--green);}
+
+  .submit-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+    color:#06140b;
+    font-weight:800;
+    font-size:14.5px;
+    cursor:pointer;
+    margin-top:6px;
+    transition:0.2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .submit-btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
+  .submit-btn:active{transform:translateY(0);}
+  .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+  .spinner{
+    width:16px;height:16px;
+    border:2px solid rgba(6,20,11,0.3);
+    border-top-color:#06140b;
+    border-radius:50%;
+    display:inline-block;
+    animation:spin 0.7s linear infinite;
+    vertical-align:middle;
+    margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .msg-box{
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13px;
+    margin-bottom:18px;
+    display:none;
+    animation:fadeIn 0.3s ease;
+  }
+  .msg-box.error{
+    background:rgba(229,72,77,0.12);
+    border:1px solid rgba(229,72,77,0.4);
+    color:#ff8a8d;
+    display:block;
+  }
+  .msg-box.success{
+    background:rgba(29,185,84,0.12);
+    border:1px solid rgba(29,185,84,0.4);
+    color:#5fe08c;
+    display:block;
+  }
+
+  .forgot-link{
+    display:block;
+    text-align:right;
+    font-size:12.5px;
+    color:var(--text-secondary);
+    margin-top:-8px;
+    margin-bottom:18px;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .forgot-link:hover{color:var(--green);}
+
+  .password-hint{
+    font-size:11.5px;
+    color:#55625d;
+    margin-top:6px;
+  }
+
+  .divider{
+    text-align:center;
+    color:#55625d;
+    font-size:12px;
+    margin:22px 0;
+    position:relative;
+  }
+  .divider::before,.divider::after{
+    content:'';
+    position:absolute;
+    top:50%;
+    width:40%;
+    height:1px;
+    background:var(--border);
+  }
+  .divider::before{left:0;}
+  .divider::after{right:0;}
+
+  .footer-note{
+    text-align:center;
+    font-size:12px;
+    color:var(--text-secondary);
+  }
+
+  /* loading overlay for redirect */
+  .page-loader{
+    position:fixed;inset:0;
+    background:var(--bg-primary);
+    z-index:999;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+  }
+  .page-loader.hidden{display:none;}
+  .loader-spinner{
+    width:40px;height:40px;
+    border:3px solid var(--border);
+    border-top-color:var(--green);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  .loader-text{color:var(--text-secondary);font-size:13px;}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="bg-glow"></div>
+
+<!-- Full page loader shown while checking auth state -->
+<div class="page-loader" id="pageLoader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Loading Campus Life: Naija...</div>
+</div>
+
+<div class="wrapper" id="mainWrapper" style="display:none;">
+  <div class="shell">
+
+    <!-- BRAND PANEL -->
+    <div class="brand-panel">
+      <div class="brand-top">
+        <div class="logo">
+          <div class="logo-badge">CL</div>
+          <div class="logo-text">CAMPUS LIFE: <span>NAIJA</span></div>
+        </div>
+        <div class="brand-tagline">Your Campus. Your Life. Your Story.</div>
+
+        <div class="brand-headline">Build your <span class="accent">university</span> life from scratch.</div>
+        <div class="brand-sub">Choose your school, your faculty, your hustle. Make friends, start a business, chase your CGPA, and become a campus legend.</div>
+
+        <div class="feature-list">
+          <div class="feature-item"><div class="feature-dot"></div> Create a fully customized student</div>
+          <div class="feature-item"><div class="feature-dot"></div> Attend lectures & build your CGPA</div>
+          <div class="feature-item"><div class="feature-dot"></div> Work jobs, run businesses, earn Naira</div>
+          <div class="feature-item"><div class="feature-dot"></div> Make friends & compete on leaderboards</div>
+        </div>
+      </div>
+      <div class="brand-footer">© Campus Life: Naija — All rights reserved.</div>
+    </div>
+
+    <!-- FORM PANEL -->
+    <div class="form-panel">
+      <div class="tabs">
+        <button class="tab-btn active" id="loginTabBtn" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" id="registerTabBtn" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <div id="globalMsg" class="msg-box"></div>
+
+      <!-- LOGIN FORM -->
+      <div class="form-view active" id="loginView">
+        <div class="form-title">Welcome back</div>
+        <div class="form-subtitle">Login to continue your story.</div>
+
+        <form id="loginForm">
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            <span class="toggle-eye" onclick="toggleVisibility('loginPassword', this)">SHOW</span>
+          </div>
+          <a class="forgot-link" onclick="handleForgotPassword()">Forgot password?</a>
+          <button type="submit" class="submit-btn" id="loginBtn">Login to Campus</button>
+        </form>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div class="form-view" id="registerView">
+        <div class="form-title">Create your account</div>
+        <div class="form-subtitle">Start your journey as a Naija student.</div>
+
+        <form id="registerForm">
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" id="regEmail" placeholder="you@example.com" required autocomplete="email">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+            <span class="toggle-eye" onclick="toggleVisibility('regPassword', this)">SHOW</span>
+            <div class="password-hint">Minimum 6 characters</div>
+          </div>
+          <div class="field">
+            <label>Confirm Password</label>
+            <input type="password" id="regConfirmPassword" placeholder="••••••••" required autocomplete="new-password">
+            <span class="toggle-eye" onclick="toggleVisibility('regConfirmPassword', this)">SHOW</span>
+          </div>
+          <button type="submit" class="submit-btn" id="registerBtn">Create My Account</button>
+        </form>
+      </div>
+
+      <div class="divider">SECURED BY FIREBASE</div>
+      <div class="footer-note">By continuing, you agree this is a fictional game world.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK (compat version — no build tools needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   FIREBASE CONFIG — REPLACE WITH YOUR OWN PROJECT CONFIG
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ============================================================
+   BACKGROUND PARTICLE CANVAS (purely cosmetic)
+   ============================================================ */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function createParticles(){
+  particles = [];
+  const count = Math.floor((canvas.width * canvas.height) / 90000);
+  for(let i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*1.8 + 0.5,
+      dx: (Math.random()-0.5)*0.15,
+      dy: (Math.random()-0.5)*0.15,
+      o: Math.random()*0.4 + 0.1
+    });
+  }
+}
+createParticles();
+window.addEventListener('resize', createParticles);
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x += p.dx; p.y += p.dy;
+    if(p.x<0||p.x>canvas.width) p.dx*=-1;
+    if(p.y<0||p.y>canvas.height) p.dy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(29,185,84,${p.o})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+function switchTab(tab){
+  document.getElementById('loginTabBtn').classList.toggle('active', tab==='login');
+  document.getElementById('registerTabBtn').classList.toggle('active', tab==='register');
+  document.getElementById('loginView').classList.toggle('active', tab==='login');
+  document.getElementById('registerView').classList.toggle('active', tab==='register');
+  hideMsg();
+}
+
+function toggleVisibility(fieldId, el){
+  const input = document.getElementById(fieldId);
+  if(input.type === 'password'){
+    input.type = 'text';
+    el.textContent = 'HIDE';
+  } else {
+    input.type = 'password';
+    el.textContent = 'SHOW';
+  }
+}
+
+function showMsg(text, type){
+  const box = document.getElementById('globalMsg');
+  box.textContent = text;
+  box.className = 'msg-box ' + type;
+}
+
+function hideMsg(){
+  const box = document.getElementById('globalMsg');
+  box.className = 'msg-box';
+  box.textContent = '';
+}
+
+function setButtonLoading(btn, loading, originalText){
+  if(loading){
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Please wait...';
+  } else {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+/* Friendly Firebase error messages */
+function friendlyError(code){
+  const map = {
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/user-disabled': 'This account has been suspended.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/email-already-in-use': 'An account already exists with this email.',
+    'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
+    'auth/network-request-failed': 'Network error. Check your connection.'
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+/* ============================================================
+   REGISTER
+   ============================================================ */
+document.getElementById('registerForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  hideMsg();
+
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirmPassword = document.getElementById('regConfirmPassword').value;
+  const btn = document.getElementById('registerBtn');
+
+  if(password !== confirmPassword){
+    showMsg('Passwords do not match.', 'error');
+    return;
+  }
+  if(password.length < 6){
+    showMsg('Password must be at least 6 characters.', 'error');
+    return;
+  }
+
+  setButtonLoading(btn, true);
+
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
+
+    // Create initial player document — this is the authoritative player record
+    await db.collection('users').doc(uid).set({
+      uid: uid,
+      email: email,
+      username: null,
+      displayName: null,
+      characterCreated: false,
+      universitySetupComplete: false,
+
+      // Core stats
+      wallet: 50000,          // starting Naira (configurable via admin_config later)
+      bank: 0,
+      xp: 0,
+      level: 1,
+      reputation: 0,
+      cgpa: 0,
+
+      // Needs
+      energy: 100,
+      hunger: 100,
+      happiness: 100,
+
+      // Academic
+      university: null,
+      campus: null,
+      faculty: null,
+      department: null,
+      programme: null,
+      studentLevel: null,
+      semester: null,
+
+      // Meta
+      accountStatus: 'active',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastActive: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    showMsg('Account created successfully! Redirecting...', 'success');
+    setTimeout(()=>{ window.location.href = 'character-creator.html'; }, 1200);
+
+  }catch(err){
+    showMsg(friendlyError(err.code), 'error');
+    setButtonLoading(btn, false, 'Create My Account');
+  }
+});
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  hideMsg();
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+
+  setButtonLoading(btn, true);
+
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    await routeUserAfterAuth(cred.user.uid);
+  }catch(err){
+    showMsg(friendlyError(err.code), 'error');
+    setButtonLoading(btn, false, 'Login to Campus');
+  }
+});
+
+/* ============================================================
+   FORGOT PASSWORD
+   ============================================================ */
+async function handleForgotPassword(){
+  const email = document.getElementById('loginEmail').value.trim();
+  if(!email){
+    showMsg('Enter your email address above first, then click "Forgot password?"', 'error');
+    return;
+  }
+  try{
+    await auth.sendPasswordResetEmail(email);
+    showMsg('Password reset email sent. Check your inbox.', 'success');
+  }catch(err){
+    showMsg(friendlyError(err.code), 'error');
+  }
+}
+
+/* ============================================================
+   ROUTING LOGIC — decide where the player goes next
+   ============================================================ */
+async function routeUserAfterAuth(uid){
+  try{
+    const doc = await db.collection('users').doc(uid).get();
+
+    if(!doc.exists){
+      // Edge case: auth account exists but no player doc — create one
+      await db.collection('users').doc(uid).set({
+        uid: uid,
+        email: auth.currentUser.email,
+        characterCreated: false,
+        universitySetupComplete: false,
+        wallet: 50000, bank:0, xp:0, level:1, reputation:0, cgpa:0,
+        energy:100, hunger:100, happiness:100,
+        accountStatus:'active',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      window.location.href = 'character-creator.html';
+      return;
+    }
+
+    const data = doc.data();
+
+    // Check suspension
+    if(data.accountStatus === 'suspended' || data.accountStatus === 'banned'){
+      await auth.signOut();
+      showMsg('Your account has been ' + data.accountStatus + '. Contact support.', 'error');
+      return;
+    }
+
+    // Update last active
+    await db.collection('users').doc(uid).update({
+      lastActive: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    if(!data.characterCreated){
+      window.location.href = 'character-creator.html';
+    } else if(!data.universitySetupComplete){
+      window.location.href = 'university-setup.html';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+
+  }catch(err){
+    showMsg('Error loading your profile. Please try again.', 'error');
+    console.error(err);
+  }
+}
+
+/* ============================================================
+   AUTH STATE OBSERVER — handles already-logged-in users
+   & controls initial page loader
+   ============================================================ */
+auth.onAuthStateChanged((user)=>{
+  const loader = document.getElementById('pageLoader');
+  const wrapper = document.getElementById('mainWrapper');
+
+  if(user){
+    // Already logged in — route immediately without showing the login form
+    routeUserAfterAuth(user.uid);
+  } else {
+    // Not logged in — show the login/register form
+    loader.classList.add('hidden');
+    wrapper.style.display = 'flex';
+  }
+});
+</script>
+
+</body>
+</html>
